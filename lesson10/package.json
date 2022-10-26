@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "test": "mocha",
+    "test1": "mocha ./test/tests1.mjs",
+    "test2": "mocha ./test/tests2.mjs"
+  },
+  "devDependencies": {
+    "mocha": "^10.1.0"
+  }
+}
