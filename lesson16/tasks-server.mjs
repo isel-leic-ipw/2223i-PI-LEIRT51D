@@ -3,7 +3,11 @@
 
 
 import express from 'express'
-import  * as api from './tasks-http-api.mjs'
+import cors from 'cors'
+import swaggerUi from 'swagger-ui-express'
+import yaml from 'yamljs'
+import  * as api from './api/tasks-http-api.mjs'
+
 
 const PORT = 1904
 
@@ -11,6 +15,9 @@ console.log("Start setting up server")
 let app = express()
 
 app.use(express.json())
+app.use(cors())
+const swaggerDocument = yaml.load('./docs/tasks-api.yaml')
+app.use('/slb', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 app.get('/tasks', api.getTasks)
 app.get('/tasks/search', api.searchTasks)

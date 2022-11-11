@@ -9,23 +9,25 @@ let tasks = new Array(NUM_TASKS).fill(0, 0, NUM_TASKS)
         return {
             id: idx,
             title: `Task ${idx}`,
-            description: `Task ${idx} description`
+            description: `Task ${idx} description`,
+            userId: idx % 2 
         } 
     })
 
 let nextId = NUM_TASKS
 
 
-export async function getTasks() {
-    return tasks
+export async function getTasks(userId) {
+    return tasks.filter(t => t.userId == userId)
 }
 
-export async function getTask(taskId) {
-    return findTaskAndDoSomething(taskId, task => task)
+export async function getTask(userId, taskId) {
+    return findTaskAndDoSomething(userId, taskId, task => task)
 }
 
-export async function deleteTask(taskId) {
+export async function deleteTask(userId, taskId) {
     return findTaskAndDoSomething(
+        userId, 
         taskId, 
         (task, taskIdx) => { 
             tasks.splice(taskIdx, 1)
@@ -33,11 +35,12 @@ export async function deleteTask(taskId) {
         })
 }
 
-export async function createTask(taskRepresentation) {
+export async function createTask(userId, taskRepresentation) {
     let newTask = {
         id: getNewId(), 
         title: taskRepresentation.title,
         description: taskRepresentation.description,
+        userId: userId
     }
 
     tasks.push(newTask)
@@ -56,8 +59,8 @@ export async function updateTask(taskId, taskRepresentation) {
 
 
 // Auxiliary functions
-function findTaskAndDoSomething(taskId, action) {
-    const taskIdx = tasks.findIndex(task => task.id == taskId)
+function findTaskAndDoSomething(userId, taskId, action) {
+    const taskIdx = tasks.findIndex(task => task.id == taskId && task.userId == userId)
     const task = tasks[taskIdx]
     if(taskIdx != -1) {
         return action(task, taskIdx)

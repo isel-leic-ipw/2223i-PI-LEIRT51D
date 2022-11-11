@@ -47,7 +47,6 @@ paths:
         400:
           description: Invalid input, object invalid
           content: {}
-      x-codegen-request-body-name: user
   /tasks:
     get:
       tags:
@@ -61,7 +60,7 @@ paths:
       parameters:
       - name: Authorization
         in: header
-        required: false
+        required: true
         schema:
           type: string
           format: uuid
@@ -130,7 +129,6 @@ paths:
         400:
           description: Invalid input, object invalid
           content: {}
-      x-codegen-request-body-name: task
   /tasks/{taskId}:
     get:
       tags:
@@ -259,7 +257,6 @@ components:
     NewTask:
       required:
       - title
-      - description
       - userId
       type: object
       properties:
