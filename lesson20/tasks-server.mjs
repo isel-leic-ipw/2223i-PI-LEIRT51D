@@ -10,10 +10,12 @@ import yaml from 'yamljs'
 import  * as tasksData from './data/tasks-data.mjs'
 import  * as usersData from './data/users-data.mjs'
 import  tasksServicesInit from './services/tasks-services.mjs'
-import  tasksApiInit from './api/tasks-http-api.mjs'
+import  tasksApiInit from './web/api/tasks-api.mjs'
+import  tasksSiteInit from './web/site/tasks-site.mjs'
 
 const tasksServices = tasksServicesInit(tasksData, usersData)
 const api = tasksApiInit(tasksServices)
+const site = tasksSiteInit(tasksServices)
 
 
 const PORT = 1904
@@ -26,11 +28,17 @@ app.use(cors())
 const swaggerDocument = yaml.load('./docs/tasks-api.yaml')
 app.use('/slb', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-app.get('/tasks', api.getTasks)
-app.get('/tasks/:id', api.getTask)
-app.delete('/tasks/:id', api.deleteTask)
-app.post('/tasks', api.createTask)
-app.put('/tasks/:id', api.updateTask)
+
+// Web Site routes
+app.get('/home', site.getHome)
+app.get('/site.css', site.getCss)
+
+// Web API routes
+app.get('/api/tasks', api.getTasks)
+app.get('/api/tasks/:id', api.getTask)
+app.delete('/api/tasks/:id', api.deleteTask)
+app.post('/api/tasks', api.createTask)
+app.put('/api/tasks/:id', api.updateTask)
 
 app.listen(PORT, () => console.log(`Server listening in http://localhost:${PORT}`))
 

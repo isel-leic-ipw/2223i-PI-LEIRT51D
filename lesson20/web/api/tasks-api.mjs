@@ -2,7 +2,7 @@
 // Handle HTTP request means:
 //  - Obtain data from requests. Request data can be obtained from: URI(path, query, fragment), headers, body
 //  - Invoke the corresponding operation on services
-//  - Generate the response
+//  - Generate the response in Json format
 
 import toHttpResponse from './response-errors.mjs'
 
@@ -15,6 +15,7 @@ export default function (tasksServices) {
         createTask: handleRequest(createTaskInternal),
         updateTask: handleRequest(updateTaskInternal)
     }
+
 
     async function getTasksInternal(req, rsp) {
         return tasksServices.getTasks(req.token, req.query.q, req.query.skip, req.query.limit)

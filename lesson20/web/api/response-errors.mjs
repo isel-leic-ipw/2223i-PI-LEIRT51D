@@ -1,4 +1,4 @@
-import { ERROR_CODES } from '../errors.mjs'
+import { ERROR_CODES } from '../../errors.mjs'
 
 
 function HttpErrorResponse(status, message, description) {
@@ -7,7 +7,7 @@ function HttpErrorResponse(status, message, description) {
         message: message,
         description: description
     }
-}
+}   
 
 const HTTP_STATUS_CODES = {
     BAD_REQUEST: 400,
