@@ -1,7 +1,5 @@
 // Application Entry Point. 
 // Register all HTTP API routes and starts the server
-
-
 import express from 'express'
 import cors from 'cors'
 import swaggerUi from 'swagger-ui-express'
@@ -32,6 +30,7 @@ app.use('/slb', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 // Web Site routes
 app.get('/home', site.getHome)
 app.get('/site.css', site.getCss)
+app.get('/tasks/:id', site.getTask)
 
 // Web API routes
 app.get('/api/tasks', api.getTasks)

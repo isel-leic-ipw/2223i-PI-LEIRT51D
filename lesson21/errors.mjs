@@ -26,7 +26,7 @@ export default {
         return {
             code: ERROR_CODES.TASK_NOT_FOUND_CODE,
             message: `Task with id ${idTask} not found`,
-            message: message
+            description: message
         }
     }
 
