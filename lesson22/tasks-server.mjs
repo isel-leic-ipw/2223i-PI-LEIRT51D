@@ -4,6 +4,8 @@ import express from 'express'
 import cors from 'cors'
 import swaggerUi from 'swagger-ui-express'
 import yaml from 'yamljs'
+import url from 'url'
+import hbs from 'hbs'
 
 import  * as tasksData from './data/tasks-data.mjs'
 import  * as usersData from './data/users-data.mjs'
@@ -24,13 +26,21 @@ let app = express()
 app.use(express.json())
 app.use(cors())
 const swaggerDocument = yaml.load('./docs/tasks-api.yaml')
-app.use('/slb', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
+// View engine setup
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+const viewsPath = `${__dirname}/web/site/resources/views`
+app.set('view engine', 'hbs')
+app.set('views', viewsPath)
+hbs.registerPartials(`${viewsPath}/partials`)
 
 // Web Site routes
 app.get('/home', site.getHome)
 app.get('/site.css', site.getCss)
+app.get('/tasks/new', site.getNewTaskForm)
 app.get('/tasks/:id', site.getTask)
+app.get('/tasks', site.getTasks)
 
 // Web API routes
 app.get('/api/tasks', api.getTasks)

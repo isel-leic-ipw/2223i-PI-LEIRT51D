@@ -1,9 +1,9 @@
-import { ERROR_CODES } from '../../errors.mjs'
+import { ERROR_CODES } from '../errors.mjs'
 
 
 function HttpErrorResponse(status, message, description) {
     this.status = status
-    this.body = {
+    this.error = {
         message: message,
         description: description
     }

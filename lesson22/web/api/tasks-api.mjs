@@ -4,7 +4,7 @@
 //  - Invoke the corresponding operation on services
 //  - Generate the response in Json format
 
-import toHttpResponse from './response-errors.mjs'
+import toHttpResponse from '../response-errors.mjs'
 
 export default function (tasksServices) {
     // Validate argument
@@ -60,23 +60,37 @@ export default function (tasksServices) {
 
     function handleRequest(handler) {
         return async function (req, rsp) {
-            const BEARER_STR = "Bearer "
-            const tokenHeader = req.get("Authorization")
-            if (!(tokenHeader && tokenHeader.startsWith(BEARER_STR) && tokenHeader.length > BEARER_STR.length)) {
-                rsp
-                    .status(401)
-                    .json({ error: `Invalid authentication token` })
-                return
-            }
-            req.token = tokenHeader.split(" ")[1]
+            // Obtain the token and make it available in req.token
+            req.token = getToken(req)
             try {
-                let body = await handler(req, rsp)
-                rsp.json(body)
+                let obj = await handler(req, rsp)
+                sendResponse(obj, rsp)
             } catch (e) {
                 const response = toHttpResponse(e)
-                rsp.status(response.status).json({ error: response.body })
-                console.log(e)
+                rsp.status(response.status)
+                sendError(response.error, rsp)
             }
         }
+    }
+
+    function getToken(req) {
+        // Obtain the token and make it available in req.token
+        const BEARER_STR = "Bearer "
+        const tokenHeader = req.get("Authorization")
+        if (!(tokenHeader && tokenHeader.startsWith(BEARER_STR) && tokenHeader.length > BEARER_STR.length)) {
+            rsp
+                .status(401)
+                .json({ error: `Invalid authentication token` })
+            return
+        }
+        return tokenHeader.split(" ")[1]
+    }
+
+    function sendResponse(obj, rsp) {
+        rsp.json(obj)
+    }
+
+    function sendError(error, rsp) {
+        rsp.json(err)
     }
 }

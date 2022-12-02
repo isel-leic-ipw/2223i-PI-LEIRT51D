@@ -6,19 +6,27 @@
 
 import url from 'url'
 
-import toHttpResponse from '../api/response-errors.mjs'
+import toHttpResponse from '../response-errors.mjs'
 
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 
+function View(name, data) {
+    this.name = name
+    this.data = data
+
+}
+
 export default function (tasksServices) {
     // Validate argument
     return {
         getHome: getHome,
         getCss: getCss,
-        getTask: handleRequest(getTaskInternal)
+        getTask: handleRequest(getTaskInternal),
+        getTasks: handleRequest(getTasksInternal),
+        getNewTaskForm: getNewTaskForm
     }
 
 
@@ -31,39 +39,50 @@ export default function (tasksServices) {
         return rsp.sendFile(__dirname + 'resources/site.css')
     }
 
+
+    async function getTasksInternal(req, rsp) {
+        const tasks = await tasksServices.getTasks(req.token, req.query.q, req.query.skip, req.query.limit)
+        
+        return new View('tasks', {title: 'All tasks', tasks: tasks.map(t => { return { title: t.title, description: t.description, important: t.title.includes('2') } }) })
+    }
+
     async function getTaskInternal(req, rsp) {
         const taskId = req.params.id
         const task = await tasksServices.getTask(req.token, taskId)
-        const html = `
-        <!DOCTYPE html>
-<html lang="en">
-<head>
-    <link rel="stylesheet" href="site.css">
-    <meta charset="utf-8" />
-    <title>${task.title}</title>
-</head>
-<body>
-    <h2>${task.title}</h2>
-    <p>${task.description}<p/>
-</body>
-</html>`
+        return new View ('task', task)
+    }
 
-        return rsp.send(html)
+    async function getNewTaskForm(req, rsp) {
+        rsp.render('newtask')
     }
 }
 
-function handleRequest(handler) {
-    const userToken = 'ef604e80-a351-4d13-b78f-c888f3e63b60'
-
+function handleRequest(handler) {    
     return async function (req, rsp) {
-        req.token = userToken
+        // Obtain the token and make it available in req.token
+        req.token = getToken()
         try {
-            let body = await handler(req, rsp)
-            rsp.json(body)
+            const obj = await handler(req, rsp)
+            sendResponse(obj)
         } catch (e) {
             const response = toHttpResponse(e)
-            rsp.status(response.status).json({ error: response.body })
-            console.log(e)
+            rsp.status(response.status)
+            sendError(response.error, rsp)
         }
     }
+}
+
+function getToken(req) {
+    // HAMMER TIME: Token for on user ie being defined here hardcoded, 
+    // until authentication support is implemented in web site interface
+
+    return 'ef604e80-a351-4d13-b78f-c888f3e63b60'
+}
+
+function sendResponse(view, rsp) {
+    rsp.render(view.name, view.data)
+}
+
+function sendError(error, rsp) {
+    rsp.render('error', error)
 }
