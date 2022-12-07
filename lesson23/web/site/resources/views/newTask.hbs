@@ -1,4 +1,14 @@
-<form>
-    <p>Task title: <input type="text"></p>
-    <p>Task description: <textarea></textarea>
+<form method="POST" action="/tasks">
+    <p>
+        <label for="title">Task Title:</label> 
+        <input type="text" name="title">
+    </p>
+    <p>
+        <label for="description">Task Description:</label>  
+        <textarea name="description"></textarea>
+    </p>
+    <input type="submit" value="Create Task">
+    
+
+
 </form>

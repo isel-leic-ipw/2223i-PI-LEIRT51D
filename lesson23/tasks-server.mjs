@@ -24,6 +24,9 @@ console.log("Start setting up server")
 let app = express()
 
 app.use(express.json())
+app.use(express.urlencoded({extended: false}))
+
+
 app.use(cors())
 const swaggerDocument = yaml.load('./docs/tasks-api.yaml')
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
@@ -35,12 +38,15 @@ app.set('view engine', 'hbs')
 app.set('views', viewsPath)
 hbs.registerPartials(`${viewsPath}/partials`)
 
+
 // Web Site routes
+app.get('/', site.getRoot)
 app.get('/home', site.getHome)
 app.get('/site.css', site.getCss)
+app.get('/tasks', site.getTasks)
 app.get('/tasks/new', site.getNewTaskForm)
 app.get('/tasks/:id', site.getTask)
-app.get('/tasks', site.getTasks)
+app.post('/tasks', site.createTask)
 
 // Web API routes
 app.get('/api/tasks', api.getTasks)

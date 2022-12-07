@@ -23,13 +23,18 @@ export default function (tasksServices) {
     // Validate argument
     return {
         getHome: getHome,
+        getRoot: getRoot,
         getCss: getCss,
-        getTask: handleRequest(getTaskInternal),
         getTasks: handleRequest(getTasksInternal),
-        getNewTaskForm: getNewTaskForm
+        getTask: handleRequest(getTaskInternal),
+        getNewTaskForm: getNewTaskForm,
+        createTask: handleRequest(createTaskInternal)
     }
 
 
+    async function getRoot(req, rsp) {
+        rsp.redirect('/tasks')
+    }
 
     async function getHome(req, rsp) {
         return rsp.sendFile(__dirname + 'resources/home.html')
@@ -41,9 +46,12 @@ export default function (tasksServices) {
 
 
     async function getTasksInternal(req, rsp) {
+        console.log("###")
         const tasks = await tasksServices.getTasks(req.token, req.query.q, req.query.skip, req.query.limit)
         
-        return new View('tasks', {title: 'All tasks', tasks: tasks.map(t => { return { title: t.title, description: t.description, important: t.title.includes('2') } }) })
+        return new View('tasks', { title: 'All tasks', tasks: tasks.map(t => { 
+            return { id: t.id, title: t.title, description: t.description, important: t.title.includes('2') } 
+        }) })
     }
 
     async function getTaskInternal(req, rsp) {
@@ -55,6 +63,12 @@ export default function (tasksServices) {
     async function getNewTaskForm(req, rsp) {
         rsp.render('newtask')
     }
+
+    async function createTaskInternal(req, rsp) {
+        let newTask = await tasksServices.createTask(req.token, req.body)
+        rsp.redirect('/tasks')
+    }
+
 }
 
 function handleRequest(handler) {    
@@ -63,11 +77,13 @@ function handleRequest(handler) {
         req.token = getToken()
         try {
             const obj = await handler(req, rsp)
-            sendResponse(obj)
+            if(obj)
+                sendResponse(obj, rsp)
         } catch (e) {
             const response = toHttpResponse(e)
             rsp.status(response.status)
             sendError(response.error, rsp)
+            console.log(e)
         }
     }
 }
