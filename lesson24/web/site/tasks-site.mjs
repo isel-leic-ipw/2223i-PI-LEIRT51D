@@ -4,6 +4,7 @@
 //  - Invoke the corresponding operation on services
 //  - Generate the response in HTML format
 
+import { nextTick } from 'process';
 import url from 'url'
 
 import toHttpResponse from '../response-errors.mjs'
@@ -28,7 +29,9 @@ export default function (tasksServices) {
         getTasks: handleRequest(getTasksInternal),
         getTask: handleRequest(getTaskInternal),
         getNewTaskForm: getNewTaskForm,
-        createTask: handleRequest(createTaskInternal)
+        createTask: handleRequest(createTaskInternal),
+        deleteTask: handleRequest(deleteTaskInternal),
+        updateTask: handleRequest(updateTaskInternal)
     }
 
 
@@ -69,6 +72,15 @@ export default function (tasksServices) {
         rsp.redirect('/tasks')
     }
 
+    async function deleteTaskInternal(req, rsp) {
+        const taskId = req.params.id
+        const task = await tasksServices.deleteTask(req.token, taskId)
+        rsp.redirect('/tasks')
+    }
+
+    async function updateTaskInternal(req, rsp) {
+        
+    }
 }
 
 function handleRequest(handler) {    
