@@ -6,12 +6,16 @@ import swaggerUi from 'swagger-ui-express'
 import yaml from 'yamljs'
 import url from 'url'
 import hbs from 'hbs'
+import cookieParser from 'cookie-parser'
 
 import  * as tasksData from './data/tasks-data.mjs'
 import  * as usersData from './data/users-data.mjs'
 import  tasksServicesInit from './services/tasks-services.mjs'
 import  tasksApiInit from './web/api/tasks-api.mjs'
 import  tasksSiteInit from './web/site/tasks-site.mjs'
+//import  session from './my-session.mjs'
+import session from 'express-session'
+import fileStore from 'session-file-store'
 
 const tasksServices = tasksServicesInit(tasksData, usersData)
 const api = tasksApiInit(tasksServices)
@@ -23,9 +27,17 @@ const PORT = 1904
 console.log("Start setting up server")
 let app = express()
 
+app.use(cookieParser())
 app.use(express.json())
-
 app.use(express.urlencoded({extended: false}))
+
+const FileStore = fileStore(session)
+app.use(session({
+    secret: "Portugal campeão de mundo",
+    resave: false,
+    saveUninitialized: false,
+    store: new FileStore()
+}))
 
 
 app.use(cors())
@@ -39,7 +51,7 @@ app.set('view engine', 'hbs')
 app.set('views', viewsPath)
 hbs.registerPartials(`${viewsPath}/partials`)
 
-app.use(foo)
+app.use(countAccesses)
 
 // Web Site routes
 app.get('/', site.getRoot)
@@ -51,7 +63,7 @@ app.get('/tasks/:id', site.getTask)
 app.post('/tasks', site.createTask)
 app.post('/tasks/:id/delete', site.deleteTask)
 app.post('/tasks/:id/edit', site.updateTask)
-app.get('/foo', foo)
+app.get('/foo', countAccesses)
 
 // Web API routes
 app.get('/api/tasks', api.getTasks)
@@ -65,14 +77,13 @@ app.listen(PORT, () => console.log(`Server listening in http://localhost:${PORT}
 console.log("End setting up server")
 
 // Route handling functions
-
-function foo(req, rsp, next) {
-    const COOKIE_NAME = "tasksCookieCounter"
-    const cookie = req.get("Cookie")
-    let count = 0
-    if(cookie) {
-        count = Number(cookie.split("=")[1])
+function countAccesses(req, rsp, next) {
+    //req.session.count = (req.session.count || 0) + 1    
+    if(req.session.count == undefined) {
+        req.session.count =  0
     }
-    rsp.cookie(COOKIE_NAME, ++count)
+    ++req.session.count
+
+    console.log(`Client accessed ${req.session.count} times`)
     next()
 }
