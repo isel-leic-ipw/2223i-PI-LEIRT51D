@@ -50,7 +50,7 @@ export default function (tasksServices) {
 
     async function getTasksInternal(req, rsp) {
         console.log("###")
-        const tasks = await tasksServices.getTasks(req.token, req.query.q, req.query.skip, req.query.limit)
+        const tasks = await tasksServices.getTasks(req.user, req.query.q, req.query.skip, req.query.limit)
         
         return new View('tasks', { title: 'All tasks', tasks: tasks.map(t => { 
             return { id: t.id, title: t.title, description: t.description, important: t.title.includes('2') } 

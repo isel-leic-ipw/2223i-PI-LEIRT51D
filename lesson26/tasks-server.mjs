@@ -63,7 +63,6 @@ app.get('/tasks/:id', site.getTask)
 app.post('/tasks', site.createTask)
 app.post('/tasks/:id/delete', site.deleteTask)
 app.post('/tasks/:id/edit', site.updateTask)
-app.get('/foo', countAccesses)
 
 // Web API routes
 app.get('/api/tasks', api.getTasks)
