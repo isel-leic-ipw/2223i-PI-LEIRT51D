@@ -25,7 +25,6 @@ export default function (tasksServices) {
     return {
         getHome: getHome,
         getRoot: getRoot,
-        getCss: getCss,
         getTasks: handleRequest(getTasksInternal),
         getTask: handleRequest(getTaskInternal),
         getNewTaskForm: getNewTaskForm,
@@ -43,14 +42,10 @@ export default function (tasksServices) {
         return rsp.sendFile(__dirname + 'resources/home.html')
     }
 
-    async function getCss(req, rsp) {
-        return rsp.sendFile(__dirname + 'resources/site.css')
-    }
 
 
     async function getTasksInternal(req, rsp) {
-        console.log("###")
-        const tasks = await tasksServices.getTasks(req.user, req.query.q, req.query.skip, req.query.limit)
+        const tasks = await tasksServices.getTasks(req.user.token, req.query.q, req.query.skip, req.query.limit)
         
         return new View('tasks', { title: 'All tasks', tasks: tasks.map(t => { 
             return { id: t.id, title: t.title, description: t.description, important: t.title.includes('2') } 
@@ -59,8 +54,8 @@ export default function (tasksServices) {
 
     async function getTaskInternal(req, rsp) {
         const taskId = req.params.id
-        const task = await tasksServices.getTask(req.token, taskId)
-        return new View ('task', task)
+        const task = await tasksServices.getTask(req.user.token, taskId)
+        return new View ('task', {token: req.user.token, task: task })
     }
 
     async function getNewTaskForm(req, rsp) {
@@ -68,13 +63,13 @@ export default function (tasksServices) {
     }
 
     async function createTaskInternal(req, rsp) {
-        let newTask = await tasksServices.createTask(req.token, req.body)
+        let newTask = await tasksServices.createTask(req.user.token, req.body)
         rsp.redirect('/tasks')
     }
 
     async function deleteTaskInternal(req, rsp) {
         const taskId = req.params.id
-        const task = await tasksServices.deleteTask(req.token, taskId)
+        const task = await tasksServices.deleteTask(req.user.token, taskId)
         rsp.redirect('/tasks')
     }
 
@@ -85,8 +80,8 @@ export default function (tasksServices) {
 
 function handleRequest(handler) {    
     return async function (req, rsp) {
-        // Obtain the token and make it available in req.token
-        req.token = getToken()
+        // Obtain the user with the token token and make it available in req.user
+        req.user = getUser()
         try {
             const obj = await handler(req, rsp)
             if(obj)
@@ -100,11 +95,12 @@ function handleRequest(handler) {
     }
 }
 
-function getToken(req) {
+function getUser(req) {
     // HAMMER TIME: Token for on user ie being defined here hardcoded, 
     // until authentication support is implemented in web site interface
-
-    return 'ef604e80-a351-4d13-b78f-c888f3e63b60'
+    return {
+        token: 'ef604e80-a351-4d13-b78f-c888f3e63b60'
+    }
 }
 
 function sendResponse(view, rsp) {

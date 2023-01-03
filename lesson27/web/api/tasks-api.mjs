@@ -61,7 +61,7 @@ export default function (tasksServices) {
     function handleRequest(handler) {
         return async function (req, rsp) {
             // Obtain the token and make it available in req.token
-            req.token = getToken(req)
+            req.token = getToken(req, rsp)
             try {
                 let obj = await handler(req, rsp)
                 sendResponse(obj, rsp)
@@ -73,7 +73,7 @@ export default function (tasksServices) {
         }
     }
 
-    function getToken(req) {
+    function getToken(req, rsp) {
         // Obtain the token and make it available in req.token
         const BEARER_STR = "Bearer "
         const tokenHeader = req.get("Authorization")

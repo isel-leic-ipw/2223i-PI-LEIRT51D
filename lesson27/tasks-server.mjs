@@ -7,6 +7,7 @@ import yaml from 'yamljs'
 import url from 'url'
 import hbs from 'hbs'
 import cookieParser from 'cookie-parser'
+import morgan from 'morgan'
 
 import  * as tasksData from './data/tasks-data.mjs'
 import  * as usersData from './data/users-data.mjs'
@@ -25,11 +26,14 @@ const site = tasksSiteInit(tasksServices)
 const PORT = 1904
 
 console.log("Start setting up server")
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 let app = express()
 
+app.use(morgan('dev'))
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
+app.use(express.static(__dirname +  'web/site/resources/public'))
 
 const FileStore = fileStore(session)
 app.use(session({
@@ -45,7 +49,6 @@ const swaggerDocument = yaml.load('./docs/tasks-api.yaml')
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 // View engine setup
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 const viewsPath = `${__dirname}/web/site/resources/views`
 app.set('view engine', 'hbs')
 app.set('views', viewsPath)
@@ -55,8 +58,6 @@ app.use(countAccesses)
 
 // Web Site routes
 app.get('/', site.getRoot)
-app.get('/home', site.getHome)
-app.get('/site.css', site.getCss)
 app.get('/tasks', site.getTasks)
 app.get('/tasks/new', site.getNewTaskForm)
 app.get('/tasks/:id', site.getTask)
