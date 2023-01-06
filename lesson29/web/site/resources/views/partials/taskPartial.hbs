@@ -1,0 +1,10 @@
+<h2 {{#if important}}class="important"{{/if}}>
+    <a href="/tasks/{{this.id}}">{{this.title}}</a>
+</h2>
+<p>{{this.description}}<p/>
+<form method="POST" action="/tasks/{{id}}/delete">
+    <input type="submit" value="Delete Task">
+</form>
+
+<input type="button" value="Delete Task with client Script1" id="b1">
+
